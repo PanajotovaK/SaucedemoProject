@@ -5,6 +5,8 @@ import Pages.HomePage;
 import Pages.LoginPage;
 import Pages.SortPage;
 import org.testng.Assert;
+import org.testng.ITestResult;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -29,6 +31,13 @@ public class SortTest extends BaseTest {
         loginPage.inputPassword("secret_sauce");
         loginPage.clickOnLoginButton();
 
+    }
+
+    @AfterMethod
+    public void captureScreenshotOnFailure(ITestResult result) {
+        if (ITestResult.FAILURE == result.getStatus()) {
+            takeScreenshot(result.getName());
+        }
     }
 
     @Test
@@ -57,7 +66,7 @@ public class SortTest extends BaseTest {
         List<Double> expectedPrices = new ArrayList<>(actualPrices);
         expectedPrices.sort(Collections.reverseOrder());
 
-        Assert.assertEquals(actualPrices, expectedPrices, "Price are not sorted from hihg to low.");
+        Assert.assertEquals(actualPrices, expectedPrices, "Prices are not sorted from high to low.");
     }
 
     @Test

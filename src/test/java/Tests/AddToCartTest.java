@@ -7,6 +7,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.testng.Assert;
+import org.testng.ITestResult;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -27,7 +29,17 @@ public class AddToCartTest extends BaseTest {
         loginPage.clickOnLoginButton();
     }
 
-    @Test
+    @AfterMethod
+    public void captureScreenshotOnFailure(ITestResult result) {
+        if (ITestResult.FAILURE == result.getStatus()) {
+            takeScreenshot(result.getName());
+        }
+    }
+
+
+
+
+    @Test(groups = "cart")
 
 public void AddToCart () {
 
@@ -48,7 +60,8 @@ public void AddToCart () {
 
     }
 
-    @Test
+    @Test(groups = "cart")
+
     public void addRandomProductToCartTest() {
 
         homePage.clearCartIfNotEmpty();
@@ -83,6 +96,22 @@ public void AddToCart () {
 
     }
 
+
+    @Test(groups = "cart")
+    public void addMultipleItemsToCartTest() {
+
+        homePage.clearCartIfNotEmpty();
+        homePage.ClickOnBurgerMenu();
+        homePage.clickOnAllItems();
+        homePage.addRandomItemsToCart(3);
+        homePage.clickOnCartButton();
+
+        WebElement cartBadge = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("shopping_cart_badge")));
+        Assert.assertEquals(cartBadge.getText(), "3");
+
+        List<WebElement> removeButtons = driver.findElements(By.cssSelector("button.btn_secondary.cart_button"));
+        Assert.assertEquals(removeButtons.size(), 3);
+    }
 
 
 }

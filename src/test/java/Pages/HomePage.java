@@ -1,20 +1,19 @@
 package Pages;
 
 import Base.BaseTest;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.testng.Assert;
 
-import java.util.Random;
-
-
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 public class HomePage extends BaseTest {
-    public HomePage () {
+
+    public HomePage() {
         PageFactory.initElements(driver, this);
     }
 
@@ -42,106 +41,101 @@ public class HomePage extends BaseTest {
     @FindBy(className = "shopping_cart_badge")
     WebElement cartBadge;
 
+    @FindBy(className = "inventory_item_name")
+    public List<WebElement> productNames;
+
+    @FindBy(css = "button.btn_inventory")
+    public List<WebElement> addToCartButtons;
 
 
-    public void ClickOnBurgerMenu () {
+
+    public void ClickOnBurgerMenu() {
         wait.until(ExpectedConditions.elementToBeClickable(burgerMenu)).click();
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("inventory_sidebar_link")));
         wait.until(ExpectedConditions.visibilityOf(allItems));
     }
 
-
-    public void clickOnAllItems () {
+    public void clickOnAllItems() {
         wait.until(ExpectedConditions.elementToBeClickable(allItems)).click();
     }
 
-    public void setAddToCart () {
+    public void setAddToCart() {
         wait.until(ExpectedConditions.elementToBeClickable(addToCart)).click();
     }
 
     public void addItemToCartByIndex(int index) {
-        WebElement item = allInventoryItems.get(index);
-
-
-        WebElement addButton = item.findElement(By.cssSelector("button.btn_inventory"));
-
-        wait.until(ExpectedConditions.elementToBeClickable(addButton)).click();
+        wait.until(ExpectedConditions.elementToBeClickable(addToCartButtons.get(index))).click();
     }
 
-    public void addRandomItemsToCart(int numberOfItems) {
-        Random rand = new Random();
+    public void addRandomItemsToCart(int count) {
+        Set<Integer> addedIndexes = new HashSet<>();
+        Random random = new Random();
 
-        for (int i = 0; i < numberOfItems; i++) {
-            int randomIndex = rand.nextInt(allInventoryItems.size());
-            WebElement item = allInventoryItems.get(randomIndex);
-
-
-            WebElement addButton = item.findElement(By.cssSelector("button.btn_inventory"));
-
-
-            if (addButton.getText().equalsIgnoreCase("Add to cart")) {
-                wait.until(ExpectedConditions.elementToBeClickable(addButton)).click();
+        while (addedIndexes.size() < count && addedIndexes.size() < addToCartButtons.size()) {
+            int index = random.nextInt(addToCartButtons.size());
+            if (!addedIndexes.contains(index)) {
+                addedIndexes.add(index);
+                addToCartButtons.get(index).click();
             }
         }
     }
 
-    public void clickOnCartButton () {
+    public void clickOnCartButton() {
         wait.until(ExpectedConditions.elementToBeClickable(cartButton)).click();
-
     }
 
     public void clearCartIfNotEmpty() {
-        List<WebElement> badges = driver.findElements(By.className("shopping_cart_badge"));
+        List<WebElement> badges = driver.findElements(org.openqa.selenium.By.className("shopping_cart_badge"));
         if (!badges.isEmpty()) {
             clickOnCartButton();
 
-            List<WebElement> removeButtons = driver.findElements(By.cssSelector("button.cart_button"));
+            List<WebElement> removeButtons = driver.findElements(org.openqa.selenium.By.cssSelector("button.cart_button"));
 
             for (WebElement removeBtn : removeButtons) {
                 wait.until(ExpectedConditions.elementToBeClickable(removeBtn)).click();
-
                 wait.until(ExpectedConditions.stalenessOf(removeBtn));
             }
-
 
             ClickOnBurgerMenu();
             clickOnAllItems();
         }
     }
 
-    public void clickOnRemoveItemFromCart () {
+    public void clickOnRemoveItemFromCart() {
         wait.until(ExpectedConditions.elementToBeClickable(removeButton)).click();
     }
 
-    public void clickOnLogoutButton () {
+    public void clickOnLogoutButton() {
         wait.until(ExpectedConditions.elementToBeClickable(logoutButton)).click();
     }
 
-    public int getCartItemCount () {
+    public int getCartItemCount() {
         try {
             return Integer.parseInt(cartBadge.getText());
-        }
-
-        catch (Exception e){
-
+        } catch (Exception e) {
             return 0;
-
         }
     }
 
-    public void verifyThatAllItemsAreVisible () {
+    public boolean areAllItemsVisible() {
         for (WebElement item : allInventoryItems) {
-            if(!item.isDisplayed()) {
-                Assert.assertTrue(item.isDisplayed(), "Item is not visible: " + item.getText());
+            if (!item.isDisplayed()) {
+                return false;
             }
         }
+        return true;
     }
 
-    public void verifyThatAllAddToCartButtonsAreEnabled () {
-        for (WebElement item : allInventoryItems) {
-            if (!addToCart.isEnabled()) {
-                Assert.assertTrue(item.isEnabled(), "Add to cart button not enabled for item: " + item.getText());
+    public boolean areAllAddToCartButtonsEnabled() {
+        for (WebElement button : addToCartButtons) {
+            if (!button.isEnabled()) {
+                return false;
             }
         }
+        return true;
     }
+
+    public void openProductDetailsByIndex(int index) {
+        productNames.get(index).click();
+    }
+
 }

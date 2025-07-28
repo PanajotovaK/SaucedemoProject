@@ -1,5 +1,12 @@
 package Base;
 
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import java.io.File;
+import java.io.IOException;
+
+
 import Pages.CartPage;
 import Pages.HomePage;
 import Pages.LoginPage;
@@ -35,10 +42,6 @@ public class BaseTest {
 
         WebDriverManager.chromedriver().setup();
 
-    
-
-
-
         ChromeOptions options = new ChromeOptions();
         options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
         options.addArguments("--disable-blink-features=AutomationControlled");
@@ -50,14 +53,25 @@ public class BaseTest {
         driver = new ChromeDriver(options);
 
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-
-
-
     }
+
+    public void takeScreenshot(String testName) {
+        File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+        try {
+            File targetFile = new File("screenshots/" + testName + ".png");
+            FileUtils.copyFile(screenshot, targetFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @AfterClass
 
     public void teardown () {
         driver.quit();
     }
+
+
+
 }

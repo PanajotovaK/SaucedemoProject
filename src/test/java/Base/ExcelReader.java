@@ -25,9 +25,21 @@ public class ExcelReader {
 
     public String getStringData(String sheetName, int rowNumber, int cellNumber) {
         sheet = wb.getSheet(sheetName);
+        if (sheet == null) {
+            throw new IllegalArgumentException("Sheet '" + sheetName + "' does not exist.");
+        }
+
         row = sheet.getRow(rowNumber);
+        if (row == null) {
+            return "";
+        }
+
         cell = row.getCell(cellNumber);
-        return cell.getStringCellValue();
+        if (cell == null) {
+            return "";
+        }
+
+        return cell.toString();
     }
 
     public int getIntegerData(String sheetName, int rowNumber, int cellNumber) {
@@ -37,8 +49,8 @@ public class ExcelReader {
         return (int) cell.getNumericCellValue();
     }
 
-    public int getLastRow(String sheet) {
-        this.sheet = wb.getSheet(sheet);
-        return this.sheet.getLastRowNum();
+    public int getLastRow(String sheetName) {
+        sheet = wb.getSheet(sheetName);
+        return sheet.getLastRowNum();
     }
 }

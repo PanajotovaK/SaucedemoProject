@@ -9,13 +9,15 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.testng.Assert;
+import org.testng.ITestResult;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class CheckoutTest extends BaseTest {
 
     @BeforeMethod
-    public void pageSetUp5 () {
+    public void pageSetUp5() {
 
         sortPage = new SortPage();
         loginPage = new LoginPage();
@@ -34,9 +36,16 @@ public class CheckoutTest extends BaseTest {
 
     }
 
+    @AfterMethod
+    public void captureScreenshotOnFailure(ITestResult result) {
+        if (ITestResult.FAILURE == result.getStatus()) {
+            takeScreenshot(result.getName());
+        }
+    }
+
     @Test
 
-    public void verifyFinishingOrderSuccessfully (){
+    public void verifyFinishingOrderSuccessfully() {
 
         cartPage.clickOnCheckOutButton();
         cartPage.inputFirstname("standard");
@@ -53,7 +62,7 @@ public class CheckoutTest extends BaseTest {
 
     @Test
 
-    public void verifyThatUserCanCancelFinishingOrder () {
+    public void verifyThatUserCanCancelFinishingOrder() {
 
         cartPage.clickOnCheckOutButton();
         cartPage.inputFirstname("standard");
@@ -68,7 +77,7 @@ public class CheckoutTest extends BaseTest {
 
     @Test
 
-    public void verifyThatUserCanFinishOrderAfterCanceling () {
+    public void verifyThatUserCanFinishOrderAfterCanceling() {
 
         cartPage.clickOnCheckOutButton();
         cartPage.inputFirstname("standard");
@@ -92,7 +101,7 @@ public class CheckoutTest extends BaseTest {
 
     @Test
 
-    public void verifyThatUserCanContinueShoppingAfterCancelingFinishingOrder () {
+    public void verifyThatUserCanContinueShoppingAfterCancelingFinishingOrder() {
 
         cartPage.clickOnCheckOutButton();
         cartPage.inputFirstname("standard");
@@ -106,7 +115,45 @@ public class CheckoutTest extends BaseTest {
 
         Assert.assertEquals(newCount, initialCount + 1, "Item is not added to the cart.");
 
-
-
     }
+
+    @Test
+    public void userCannotProceedWithEmptyFirstName() {
+        cartPage.clickOnCheckOutButton();
+        cartPage.inputFirstname("");
+        cartPage.inputLastname("User");
+        cartPage.inputPostalCode("11000");
+        cartPage.clickOnContinueButton();
+
+        WebElement error = driver.findElement(By.cssSelector("h3[data-test='error']"));
+        Assert.assertTrue(error.isDisplayed());
+        Assert.assertTrue(error.getText().contains("Error: First Name is required"));
+    }
+
+    @Test
+    public void userCannotProceedWithEmptyLastName() {
+        cartPage.clickOnCheckOutButton();
+        cartPage.inputFirstname("Standard");
+        cartPage.inputLastname("");
+        cartPage.inputPostalCode("11000");
+        cartPage.clickOnContinueButton();
+
+        WebElement error = driver.findElement(By.cssSelector("h3[data-test='error']"));
+        Assert.assertTrue(error.isDisplayed());
+        Assert.assertTrue(error.getText().contains("Error: Last Name is required"));
+    }
+
+    @Test
+    public void userCannotProceedWithEmptyPostalCode() {
+        cartPage.clickOnCheckOutButton();
+        cartPage.inputFirstname("Standard");
+        cartPage.inputLastname("User");
+        cartPage.inputPostalCode("");
+        cartPage.clickOnContinueButton();
+
+        WebElement error = driver.findElement(By.cssSelector("h3[data-test='error']"));
+        Assert.assertTrue(error.isDisplayed());
+        Assert.assertTrue(error.getText().contains("Error: Postal Code is required"));
+    }
+
 }
